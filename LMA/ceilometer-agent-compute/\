@@ -1,0 +1,4 @@
+#!/bin/bash
+
+service ceilometer-agent-central restart
+#/etc/init.d/ceilometer-agent-central start

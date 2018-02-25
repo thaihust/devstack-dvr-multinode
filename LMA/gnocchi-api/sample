@@ -1,0 +1,38 @@
+FROM ubuntu:16.04
+MAINTAINER thangmv@vcs-team
+
+ENV SERVICE="gnocchi"
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt update && apt install -y software-properties-common \
+	&& add-apt-repository cloud-archive:ocata -y
+
+RUN apt update && apt install -y python-pip python-pymysql python-memcache \
+	&& apt clean
+
+RUN apt update && apt install -y apache2 libapache2-mod-wsgi
+
+RUN apt update && apt install -y gnocchi-api gnocchi-common python-gnocchi
+
+RUN mkdir -p /var/www/cgi-bin/gnocchi
+
+COPY gnocchi.conf /etc/gnocchi/gnocchi.conf
+COPY wsgi-gnocchi.conf /etc/apache2/sites-available/wsgi-gnocchi.conf
+COPY app.wsgi /var/www/cgi-bin/gnocchi/app.wsgi
+COPY start_gnocchi-api.sh /usr/local/bin/start_gnocchi-api.sh
+
+RUN chmod +x /usr/local/bin/start_gnocchi-api.sh \
+	&& ln -s /etc/apache2/sites-available/wsgi-gnocchi.conf /etc/apache2/sites-enabled/ \
+	&& a2dissite 000-default.conf \
+	&& echo > /etc/apache2/ports.conf \
+	&& echo ServerName localhost >> /etc/apache2/apache2.conf
+
+VOLUME ["/var/log/gnocchi", "/var/log/apache2", "/var/lib/gnocchi"]
+
+EXPOSE 8041
+
+USER root
+
+CMD ["start_gnocchi-api.sh"]
+

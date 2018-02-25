@@ -1,0 +1,159 @@
+---
+
+ops_dk_repo: https://gitlab.visc.com/thaiph5/ops_container_deployment.git
+ops_dk_repo_dir: ops_container_deployment
+ops_dk_repo_branch: proxy
+time_zone: Asia/Ho_Chi_Minh
+openstack_release: ocata
+openstack_branch: "stable/{{ openstack_release }}"
+server_delay: 10
+server_time_out: 40
+
+proxy_addr: "http://192.168.5.8:3128/"
+
+services_controller: os-controller
+
+vip:
+  public:
+    ip: 192.168.2.135
+    inf: ens4
+  private:
+    ip: 10.10.0.135
+    inf: ens3
+
+ha_cred:
+  user: cloud
+  pass: Rc9mOd14mdebLraFQzZyeLi9rNAihvj3 
+
+docker_host_port: 4000
+docker_reg_port: 4000
+docker_reg_host: ops-services-registry
+docker_reg_ip: 10.10.0.145
+
+docker_images_tag: ocata 
+
+management_net: 10.10.0.0/24
+management_netaddr: "{{ management_net | net_parser | first }}"
+management_netmask: "{{ management_net | net_parser | last }}"
+management_gw: 10.10.0.145
+
+provider_net: 192.168.2.0/24
+provider_netaddr: "{{ provider_net | net_parser | first }}"
+provider_netmask: "{{ provider_net | net_parser | last }}"
+provider_gw: 192.168.2.1
+
+controlplane_mgmt_ip: "{{ vip.private.ip }}"
+controlplane_public_ip: "{{ vip.public.ip }}" 
+
+influxdb_host: "{{ groups['influxdb'] | map('extract', hostvars, ['ansible_ssh_host']) | first }}"
+influxdb_pass: muwfHQMviG9fbYYj06wzpm7SBhVCf4pl 
+
+logstash_host: "{{ groups['logstash'] | map('extract', hostvars, ['ansible_ssh_host']) | first }}"
+logstash_port: 5044
+
+# services password
+rabbit_user: openstack
+rabbit_passwd: 46SWI9E8RCwIpJcD8L5LAf3994zauruY
+rabbit_port: 5672
+
+keystone_pass: 28cz05R92w5utp4hsgr8GqpIHjlYAgZc
+keystone_dbpass: YsaHCJVkP8AbpEXKFgyHk2chaybPnIUF
+
+glance_dbpass: zRGiHjuzzMxHKSxAIRhhCfo5j1hzFTkx
+glance_pass: AagLtxAtFy7YHYPmq1W23IXDMqMoRmJr
+
+nova_dbpass: wZOy3sFIszroFKUbEOE6UKyX5a8mVNuq
+nova_pass: xIwwJmtSL9tXCmxpoLmJNuTVPDcOuNvL
+placement_pass: w16TtWVj7E5Iv80bVKoqltgJu90FJp8w
+
+neutron_dbpass: xSJ6GnKOxKCRhnJLTxZDB06v6z2pQDkv
+neutron_pass: VzHdB3WUzqdjw3CEIfWZ9mykqzXbQaze
+
+cinder_dbpass: WbuRs8HJExuR9VbOR1JDQx4Dw5zJtIpU
+cinder_pass: D8HZHZRZIX6KbhKr9FOzvt3uWNXiYFAF
+
+metadata_secret: f5yUgrazBHT0xOEWyUCR3NqoGc7Gqfnd
+memcached_pass: nAl5QwV08vVQVn3tBPI3hb9nFWRrHAo3
+memcached_port: 11211
+
+masakari_dbpass: feqdryRTrpOJoVUCAyRll7Mq3HbKi8ZB
+masakari_pass: INhcdg9oW7XPylcFNSnXbf4a55j6xpjq 
+
+no_proxy_env:
+  http_proxy: ''
+  https_proxy: ''
+
+general_env:
+  MY_IP: "{{ ansible_ssh_host }}" 
+  TUNNEL_IP: "{{ ansible_ssh_host }}" 
+  REGISTRY_HOST: "{{ services_controller }}" 
+  MEMCACHED_SERVER: "{{ ansible_ssh_host }}" 
+  CELL_NAME: cell1
+  DB_HOST: "{{ services_controller }}"
+  CONTROLLER_HOST: "{{ services_controller }}"
+  REGION_NAME: North_VN
+  TRANSPORT_URL: "rabbit://{% for controller in groups['controller'] %}{{ rabbit_user }}:{{ rabbit_passwd }}@{{ controller }}:{{ rabbit_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+  RABBIT_HOSTS: "{% for controller in groups['controller'] %}{{ controller }}:{{ rabbit_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+  MEMCACHED_SERVERS: "{% for controller in groups['controller'] %}{{ controller }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+  MEMCACHE_SECRET_KEY: "{{ memcached_pass }}"
+
+ops_client_env:
+  OS_PROJECT_DOMAIN_NAME: Default
+  OS_PROJECT_DOMAIN_ID: default
+  OS_USER_DOMAIN_NAME: Default
+  OS_USER_DOMAIN_ID: default
+  OS_PROJECT_NAME: admin
+  OS_TENANT_NAME: admin
+  OS_USERNAME: admin
+  OS_PASSWORD: "{{ keystone_pass }}"
+  OS_AUTH_URL: "http://{{ services_controller }}:35357/v3"
+  OS_AUTH_URL_PUB: "http://{{ services_controller }}:5000"
+  OS_IDENTITY_API_VERSION: 3
+  OS_IMAGE_API_VERSION: 2
+
+keystone_env:
+  ADMIN_PASS: "{{ keystone_pass }}"
+  KEYSTONE_DBPASS: "{{ keystone_dbpass }}"
+
+glance_env:
+  GLANCE_DBPASS: "{{ glance_dbpass }}"
+  GLANCE_PASS: "{{ glance_pass }}"
+
+nova_env:
+  NOVA_DBPASS: "{{ nova_dbpass }}"
+  NOVA_PASS: "{{ nova_pass }}"
+  PLACEMENT_PASS: "{{ placement_pass }}"
+  NEUTRON_PASS: "{{ neutron_pass }}"
+  METADATA_PROXY_SHARED_SECRET: "{{ metadata_secret }}"
+
+neutron_env:
+  NEUTRON_DBPASS: "{{ neutron_dbpass }}"
+  NEUTRON_PASS: "{{ neutron_pass }}"
+  NOVA_PASS: "{{ nova_pass }}"
+  METADATA_PROXY_SHARED_SECRET: "{{ metadata_secret }}"
+
+cinder_env:
+  CINDER_DBPASS: "{{ cinder_dbpass }}"
+  CINDER_PASS: "{{ cinder_pass }}"
+
+masakari_env:
+  MASAKARI_DBPASS: "{{ masakari_dbpass }}" 
+  MASAKARI_PASS: "{{ masakari_pass }}"
+  NOVA_PASS: "{{ nova_pass }}"
+  MSQ_PASS: "{{ rabbit_passwd }}" 
+
+identity_env: "{{ general_env | merge(keystone_env) | merge(no_proxy_env) }}"
+
+openstack_client_env: "{{ general_env | merge(ops_client_env) | merge(glance_env) | merge(nova_env) | merge(neutron_env) | merge(cinder_env) | merge(no_proxy_env) }}"
+
+image_env: "{{ general_env | merge(glance_env) | merge(no_proxy_env) }}"
+
+compute_env: "{{ general_env | merge(nova_env) | merge(no_proxy_env) }}"
+
+network_env: "{{ general_env | merge(neutron_env) | merge(no_proxy_env) }}"
+
+block_storage_env: "{{ general_env | merge(cinder_env) | merge(no_proxy_env) }}"
+
+horizon_env: "{{ general_env | merge(no_proxy_env) }}"
+
+ha_compute_env: "{{ general_env | merge(masakari_env) | merge(no_proxy_env) }}"

@@ -1,0 +1,33 @@
+---
+
+db_params:
+  wsrep_cluster_name: os-cluster
+  sst_user: sst
+  sst_passwd: 9UftEo4PnAKB1xBgMP0jb1kRg2XMkcQ4 
+  root_passwd: 4Mv2sqWnZDN4JXxhXxKGHOcgj5fbZsAl 
+  max_connections: 10000
+  max_connect_errors: 10000
+  max_allowed_packet: 16M
+
+dbs:
+  - name: keystone
+    user: keystone
+    passwd: "{{ keystone_env.KEYSTONE_DBPASS }}"
+  - name: glance
+    user: glance
+    passwd: "{{ glance_env.GLANCE_DBPASS }}"
+  - name: nova_api
+    user: nova
+    passwd: "{{ nova_env.NOVA_DBPASS }}"
+  - name: nova
+    user: nova
+    passwd: "{{ nova_env.NOVA_DBPASS }}"
+  - name: nova_cell0
+    user: nova
+    passwd: "{{ nova_env.NOVA_DBPASS }}"
+  - name: neutron
+    user: neutron
+    passwd: "{{ neutron_env.NEUTRON_DBPASS }}"
+  - name: cinder
+    user: cinder
+    passwd: "{{ cinder_env.CINDER_DBPASS }}"
