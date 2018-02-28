@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REGISTRY=ops-services-registry:4000
+REGISTRY=cloud-docker-registry:4000
 TAG=ocata
 
 MON_SRV=(

@@ -2,8 +2,6 @@ FROM ubuntu:16.04
 MAINTAINER thangmv@vcs-team
 
 ENV SERVICE="ceilometer"
-ENV http_proxy="http://192.168.5.8:3128"
-ENV https_proxy="http://192.168.5.8:3128"
 
 ENV DEBIAN_FRONTEND noninteractive
 
